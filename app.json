@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "plugins": [
+      "expo-router"
+    ],
+    "name": "test",
+    "slug": "test",
+     "ios": {
+      "supportsTablet": true
+    }
+  }
+}
+
