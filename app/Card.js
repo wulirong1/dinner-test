@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import AddComment from './addcomment';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Dimensions } from 'react-native';
 
 export default function Card({ restaurant, onClose }) {
-  const SCREEN_HEIGHT = 800;
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
   const HALF_OPEN = SCREEN_HEIGHT * 0.5;
-  const FULL_OPEN = 100;
+  const FULL_OPEN = 0;
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const currentY = useRef(HALF_OPEN);
   const [showAddComment, setShowAddComment] = useState(false);
@@ -19,7 +19,7 @@ export default function Card({ restaurant, onClose }) {
   const panResponder = useRef(
     PanResponder.create({
 
-      onStartShouldSetPanResponder: () => true, // ⭐ 超重要
+      onStartShouldSetPanResponder: () => true, // ⭐ 只給 handle 用
 
       onMoveShouldSetPanResponder: (_, gesture) => {
         return Math.abs(gesture.dy) > 5;
@@ -52,7 +52,6 @@ export default function Card({ restaurant, onClose }) {
 
     })
   ).current;
-
   const openingHours =
     restaurant?.details?.opening_hours?.weekday_text;
 
@@ -95,10 +94,12 @@ export default function Card({ restaurant, onClose }) {
   };
 
   if (!restaurant) return null;
-
+  const restaurantReviews = reviews.filter(
+    r => r.restaurantId === restaurant.id
+  );
   return (
     <Animated.View
-      
+
       pointerEvents={restaurant ? 'auto' : 'none'}
       style={[
         styles.card,
@@ -159,13 +160,13 @@ export default function Card({ restaurant, onClose }) {
           }}
           panHandlers={panResponder.panHandlers}  // 🔥 傳下去
         />
-        
+
       ) : (
         <>
 
-        <View style={styles.handleContainer} {...panResponder.panHandlers}>
-  <View style={styles.handle} />
-</View>
+          <View style={styles.handleContainer} {...panResponder.panHandlers}>
+            <View style={styles.handle} />
+          </View>
 
           <View style={styles.cardtop}>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
@@ -181,7 +182,7 @@ export default function Card({ restaurant, onClose }) {
           <ScrollView
             contentContainerStyle={[
               styles.scrollContent,
-              { paddingBottom: 100 } // ⭐ 關鍵
+              { paddingBottom: 140 } // ⭐ 關鍵
             ]}
             scrollEnabled={true}
           >
@@ -211,57 +212,56 @@ export default function Card({ restaurant, onClose }) {
               )}
             </View>
 
-            {reviews.length > 0 && (
-              <Text style={styles.sectionTitle}>-comments-</Text>
+
+            <Text style={styles.sectionTitle}>-comments-</Text>
+            {restaurantReviews.length === 0 && (
+              <Text style={styles.commentBefore}>您尚未留下評論</Text>
             )}
 
-            <TouchableOpacity
-              style={styles.fixedBtn}
-              onPress={() => setShowAddComment(true)}
-            >
-              <Text style={styles.fixedBtnText}>新增評論</Text>
-            </TouchableOpacity>
 
-            {reviews
-              .filter(r => r.restaurantId === restaurant.id)
-              .map((r) => (
-                <TouchableOpacity
-                  key={r.id}
-                  style={styles.reviewSection}
-                  onPress={() => {
-                    setSelectedReview(r);
-                    setShowAddComment(true);
-                  }}
-                >
-                  <View style={styles.reviewHeader}>
-                    <Text style={styles.date}>{r.date}</Text>
-                    <View style={styles.likeIcon}>
-                      <MaterialIcons
-                        name={r.like === 'like' ? 'thumb-up' : 'thumb-up-off-alt'}
-                        size={22}
-                        color={r.like === 'like' ? '#8FA89E' : '#555'}
-                      />
+            {restaurantReviews.map((r) => (
+              <TouchableOpacity
+                key={r.id}
+                style={styles.reviewSection}
+                onPress={() => {
+                  setSelectedReview(r);
+                  setShowAddComment(true);
+                }}
+              >
+                <View style={styles.reviewHeader}>
+                  <Text style={styles.date}>{r.date}</Text>
+                  <View style={styles.likeIcon}>
+                    <MaterialIcons
+                      name={r.like === 'like' ? 'thumb-up' : 'thumb-up-off-alt'}
+                      size={22}
+                      color={r.like === 'like' ? '#8FA89E' : '#555'}
+                    />
 
-                      <MaterialIcons
-                        name={r.like === 'dislike' ? 'thumb-down' : 'thumb-down-off-alt'}
-                        size={22}
-                        color={r.like === 'dislike' ? '#8FA89E' : '#555'}
-                        style={{ marginLeft: 10 }}
-                      />
-                    </View>
+                    <MaterialIcons
+                      name={r.like === 'dislike' ? 'thumb-down' : 'thumb-down-off-alt'}
+                      size={22}
+                      color={r.like === 'dislike' ? '#8FA89E' : '#555'}
+                      style={{ marginLeft: 10 }}
+                    />
                   </View>
-                  <Text style={styles.reviewText}>{r.text}</Text>
+                </View>
+                <Text style={styles.reviewText}>{r.text}</Text>
 
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reviewImagesRow}>
-                    {(r.images || []).map((img, idx) => (
-                      <Image key={idx} source={{ uri: img }} style={styles.reviewImage} />
-                    ))}
-                  </ScrollView>
-                </TouchableOpacity>
-              ))}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reviewImagesRow}>
+                  {(r.images || []).map((img, idx) => (
+                    <Image key={idx} source={{ uri: img }} style={styles.reviewImage} />
+                  ))}
+                </ScrollView>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
 
-
+          <TouchableOpacity
+            style={styles.floatingBtn}
+            onPress={() => setShowAddComment(true)}
+          >
+            <Text style={styles.fixedBtnText}>新增評論</Text>
+          </TouchableOpacity>
         </>
       )}
     </Animated.View>
@@ -273,17 +273,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: '90%',
+    height: '95%',
     backgroundColor: '#FFF0DE',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     padding: 20,
+    zIndex: 1000,
   },
 
   titleContainer: {
     width: '90%',
     marginBottom: 10,
-    padding: 10,
+    
   },
 
   title: {
@@ -344,6 +345,7 @@ const styles = StyleSheet.create({
   reviewText: {
     marginTop: 5,
     fontSize: 14,
+    width:'80%'
   },
 
   reviewImage: {
@@ -384,14 +386,46 @@ const styles = StyleSheet.create({
   },
 
   handleContainer: {
-  alignItems: 'center',
-  paddingVertical: 10,
-},
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
 
-handle: {
-  width: 50,
-  height: 5,
-  borderRadius: 3,
-  backgroundColor: '#ccc',
-},
+  handle: {
+    width: 50,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#ccc',
+  },
+
+  floatingBtn: {
+    position: 'absolute',
+    bottom: 40,
+    left: 20,
+    right: 20,
+    backgroundColor: '#8FA89E',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+
+  sectionTitle: {
+    paddingTop: 10,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 20
+  },
+
+  commentBefore:{
+    width:'100%',
+    marginTop:10,
+    backgroundColor:'#fff',
+    padding:30,
+    textAlign: 'center',
+    borderRadius:20,
+  },
 });

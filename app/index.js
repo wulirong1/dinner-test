@@ -274,9 +274,10 @@ export default function App() {
 
         <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
 
-          <View style={[styles.searchBox, { backgroundColor: localTheme.searchBg }]}>
+          <View style={[styles.searchBox, { backgroundColor: '#fff0de' }]}>
             <TextInput
-              placeholder="搜尋餐廳..."
+              placeholder="Search"
+              placeholderTextColor="#000"
               value={searchText}
               onChangeText={setSearchText}
               style={styles.searchInput}
@@ -320,24 +321,6 @@ export default function App() {
             ))}
           </View>
 
-          <View style={styles.sliderContainer}>
-            <Slider
-              style={styles.slider}
-              minimumValue={500}
-              maximumValue={1000}
-              step={100}
-              value={radius}
-              onValueChange={(value) => setRadius(value)}
-            />
-
-            {/* 👇 新增這顆按鈕 */}
-            <TouchableOpacity
-              style={styles.recenterButton}
-              onPress={recenterMap}
-            >
-              <MaterialIcons name="gps-fixed" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
 
           <View style={styles.progressWrapper}>
             <View style={styles.buttonBackground} />
@@ -434,26 +417,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { ...StyleSheet.absoluteFillObject },
 
-  sliderContainer: {
-    position: 'absolute',
-    right: 10,
-    top: '50%',
-    transform: [{ translateY: -150 }],
-    height: 300,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  slider: {
-    width: 300,
-    height: 50,
-    transform: [
-      { rotate: '-90deg' },
-      { translateY: 130 },
-      { translateX: -100 },
-    ],
-  },
-
   progressWrapper: {
     position: 'absolute',
     bottom: 110,
@@ -501,17 +464,20 @@ const styles = StyleSheet.create({
     zIndex: 999,
     borderRadius: 20,
     padding: 10,
+    backgroundColor:'#000'
   },
 
   searchInput: {
     fontSize: 16,
-    marginBottom: 5,
+    fontWeight:'semibold',
+    margin: 5,
+    color:'#000'
   },
 
   resultItem: {
     padding: 8,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    backgroundColor:'#fff0de'
   },
 
   recenterButton: {

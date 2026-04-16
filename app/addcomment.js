@@ -63,106 +63,134 @@ export default function AddComment({ onClose, onSubmit, onDelete, restaurant, re
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={{ flex: 1 }}>
 
-        <View style={styles.handleContainer} {...panHandlers} pointerEvents="box-only" >
+        <View style={styles.handleContainer} {...panHandlers} pointerEvents="box-none" >
           <View style={styles.handle} />
         </View>
 
-        <ScrollView
+        <View
           style={styles.container}
           contentContainerStyle={{ paddingBottom: 150 }}
           keyboardShouldPersistTaps="handled"
         >
 
-
-
-          {/*返回按鈕*/}
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={onClose}
-          >
-            <MaterialIcons name="chevron-left" size={35} color="#6B4F4F" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={onClose}
-          >
-            <MaterialIcons name="close" size={28} color="#6B4F4F" />
-          </TouchableOpacity>
-
-
-          <Text style={styles.title}>
-            {restaurant?.name || '店家名稱'}
-          </Text>
-
-
-          {/*喜歡與討厭按鈕*/}
-          <View style={styles.likeRow}>
-            <TouchableOpacity onPress={() => setLike('like')}>
-              <MaterialIcons
-                name={like === 'like' ? 'thumb-up' : 'thumb-up-off-alt'}
-                size={40}
-                color={like === 'like' ? '#8FA89E' : '#555'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setLike('dislike')}>
-              <MaterialIcons
-                name={like === 'dislike' ? 'thumb-down' : 'thumb-down-off-alt'}
-                size={40}
-                color={like === 'dislike' ? '#8FA89E' : '#555'}
-              />
-            </TouchableOpacity>
-          </View>
-
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="新增評論..."
-              placeholderTextColor="#aaa"   // 可選：讓字變淡灰色
-              value={text}
-              onChangeText={setText}
-              multiline
-              style={styles.input}
-            />
-          </View>
-
-
-          <TouchableOpacity
-            style={styles.uploadBox}
-            onPress={() =>
-              Alert.alert(
-                '選擇圖片',
-                '請選擇方式',
-                [
-                  { text: '拍照', onPress: takePhoto },
-                  { text: '從相簿選擇', onPress: pickImage },
-                  { text: '取消', style: 'cancel' },
-                ]
-              )
-            }
-          >
-            <Text style={{ fontSize: 30 }}>📷</Text>
-            <Text>上傳圖片</Text>
-          </TouchableOpacity>
-
-
-          <View style={styles.imageScrollContainer}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.imageScrollContent}
+          <View style={styles.top}>
+            {/*返回按鈕*/}
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={onClose}
             >
-              {images.map((img, i) => (
-                <Image
-                  key={i}
-                  source={{ uri: img }}
-                  style={styles.previewImage}
-                />
-              ))}
-            </ScrollView>
+              <MaterialIcons name="chevron-left" size={35} color="#6B4F4F" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={onClose}
+            >
+              <MaterialIcons name="close" size={28} color="#6B4F4F" />
+            </TouchableOpacity>
+
+
+            <Text style={styles.title}>
+              {restaurant?.name || '店家名稱'}
+            </Text>
+
+
+
           </View>
 
+          <ScrollView
+            style={styles.context}
+            nestedScrollEnabled={true} // ⭐ 必加
+            contentContainerStyle={{ paddingBottom: review ? 170 : 160 }}
+          >
+
+            {/*喜歡與討厭按鈕*/}
+            <View style={styles.likeRow}>
+              <TouchableOpacity onPress={() => setLike('like')}>
+                <MaterialIcons
+                  name={like === 'like' ? 'thumb-up' : 'thumb-up-off-alt'}
+                  size={40}
+                  color={like === 'like' ? '#8FA89E' : '#555'}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setLike('dislike')}>
+                <MaterialIcons
+                  name={like === 'dislike' ? 'thumb-down' : 'thumb-down-off-alt'}
+                  size={40}
+                  color={like === 'dislike' ? '#8FA89E' : '#555'}
+                />
+              </TouchableOpacity>
+            </View>
+
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="新增評論..."
+                placeholderTextColor="#aaa"   // 可選：讓字變淡灰色
+                value={text}
+                onChangeText={setText}
+                multiline
+                style={styles.input}
+              />
+            </View>
+
+
+            <TouchableOpacity
+              style={styles.uploadBox}
+              
+              onPress={() =>
+                Alert.alert(
+                  '選擇圖片',
+                  '請選擇方式',
+                  [
+                    { text: '拍照', onPress: takePhoto },
+                    { text: '從相簿選擇', onPress: pickImage },
+                    { text: '取消', style: 'cancel' },
+                  ]
+                )
+              }
+            >
+              
+              <Text>上傳圖片</Text>
+            </TouchableOpacity>
+
+
+            <View style={styles.imageScrollContainer}>
+              <ScrollView
+                horizontal
+                nestedScrollEnabled={true} // ⭐ 超重要
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.imageScrollContent}
+              >
+                {images.map((img, i) => (
+                  <View key={i} style={styles.imageWrapper}>
+
+                    <Image
+                      source={{ uri: img }}
+                      style={styles.previewImage}
+                    />
+
+                    {/* ❌ 刪除按鈕 */}
+                    <TouchableOpacity
+                      style={styles.deleteImageBtn}
+                      onPress={() => {
+                        const newImages = images.filter((_, index) => index !== i);
+                        setImages(newImages);
+                      }}
+                    >
+                      <MaterialIcons name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+
+
+
+
+          </ScrollView>
           {/*上傳按鈕*/}
           <TouchableOpacity
             style={styles.submitBtn}
@@ -196,7 +224,8 @@ export default function AddComment({ onClose, onSubmit, onDelete, restaurant, re
             </TouchableOpacity>
           )}
 
-        </ScrollView>
+
+        </View>
       </View>
 
 
@@ -209,10 +238,26 @@ export default function AddComment({ onClose, onSubmit, onDelete, restaurant, re
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F2EE',
-    padding: 20,
+    Bottom: 0,
+    height: '90%'
+  },
+
+  top: {
+
+    backgroundColor: '#Fffode',
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    paddingTop: 10,
+  },
+
+  context: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 30,
+    paddingTop: 20,
+    borderRadius: 20,
 
   },
+
 
   title: {
     textAlign: 'center',
@@ -238,8 +283,8 @@ const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    borderWidth: 1,
-    borderColor: '#8B6B61',
+    borderWidth: 3,
+    borderColor: '#848282',
     borderRadius: 15,
     padding: 15,
     height: 150,
@@ -251,10 +296,10 @@ const styles = StyleSheet.create({
   },
 
   uploadBox: {
-    borderWidth: 1,
-    borderColor: '#8B6B61',
-    borderRadius: 15,
-    height: 150,
+    borderWidth: 3,
+    color: '#848282',
+    borderRadius: 999,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
 
@@ -262,7 +307,7 @@ const styles = StyleSheet.create({
 
   submitBtn: {
     position: 'absolute',
-    bottom: 60,
+    bottom: 30,
     left: 20,
     right: 20,
     backgroundColor: '#8FA89E',
@@ -276,22 +321,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  imageScrollContainer: {
-    height: 140,   // 🔥 要跟圖片一起變大
-    marginBottom: 100,
-  },
-
   imageScrollContent: {
-    paddingHorizontal: 5, // 讓第一張跟最後一張照片不要貼邊
-    alignItems: 'center',
-  },
+  paddingHorizontal: 5,
+  flexDirection: 'row', // ⭐ 很重要
+  alignItems: 'center',
+},
 
+    
   previewImage: {
     width: 120,   // 🔥 放大
     height: 120,
     borderRadius: 12,
     marginRight: 12,
     backgroundColor: '#ddd',
+    marginTop:12,
   },
 
   backBtn: {
@@ -303,7 +346,7 @@ const styles = StyleSheet.create({
 
   deleteBtn: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 100,
     left: 20,
     right: 20,
     backgroundColor: '#FF6B6B',
@@ -332,9 +375,24 @@ const styles = StyleSheet.create({
   },
 
   closeBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 10,
+  },
+
+  imageWrapper: {
+  position: 'relative',
+  marginRight: 12,
+},
+
+deleteImageBtn: {
   position: 'absolute',
-  top: 10,
-  right: 10,
+  top: 5,
+  right: 5,
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  borderRadius: 10,
+  padding: 3,
   zIndex: 10,
 },
 });
